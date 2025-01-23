@@ -310,9 +310,19 @@ kubectl apply -f httpd-service.yaml
 kubectl get deployments
 kubectl get services
 minikube service httpd-service --url
+curl <url>
+
 
 ```
+### Delete
 
+```bash
+kubectl delete -f httpd-deployment.yaml
+kubectl delete -f httpd-service.yaml
+
+
+
+```
 ---
 
 ## 9. Access Pods Externally
@@ -354,4 +364,75 @@ minikube delete
 
 --- 
 
-**Fin de la documentation**
+## 9. MongoDB application
+
+
+
+## MongoDB pod
+
+```bash
+echo -n 'labo' | base64
+echo -n '1234labo' | base64
+nano mongodb-secret.yaml
+```
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret
+type: Opaque
+data:
+  mongo-root-username: bGFibw==
+  mongo-root-password: MTIzNGxhYm8=
+```
+```bash
+kubectl apply -f mongodb-secret.yaml
+
+nano mongodb-deploy.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+  labels:
+    app: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb  
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-password
+
+        
+```
+```bash
+k apply -f mongodb-deploy.yaml
+```
+## Internal Service
+
+## MongoExpress deployement (we need MongoDB url (ConfigMap) and credentials (Secret ) to communicate -> deployement file) 
+
+
+## External Service
