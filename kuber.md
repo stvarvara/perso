@@ -256,6 +256,64 @@ spec:
 ```
 
 ---
+### Example
+```bash
+nano httpd-deployment.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deploy
+  labels:
+    app: httpd
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4
+        ports:
+        - containerPort: 80
+```
+```bash
+nano httpd-service.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd-service
+spec:
+  selector:
+    app: httpd
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+
+```
+
+```bash
+kubectl apply -f httpd-deployment.yaml
+kubectl apply -f httpd-service.yaml
+kubectl get deployments
+kubectl get services
+minikube service httpd-service --url
+
+```
+
+---
 
 ## 9. Access Pods Externally
 
