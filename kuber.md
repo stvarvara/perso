@@ -117,7 +117,7 @@ k create deployment my-nginx-deploy --image=nginx
 k describe deploy my-nginx-deploy
 k describe pod <pod_name>
 
-### Scale the Deployment
+### Commands for the Deployment
 
 k scale deploy my-nginx-deploy --replicas=10
 k get pods -o wide
@@ -132,7 +132,63 @@ k exec -it my-nginx-deploy-75488fc988-vp8t6 -- bin/bash
 
 k delete deployment  my-nginx-deploy-75488fc988-vp8t6
 
-## 8. Access Pods Externally
+### Kubernetes config files
+
+nano config-file.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy2
+  labels:
+    app: nginx
+spec:
+#for the deployment
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+    #for the pod
+      containers:
+      - name: nginx
+        image: nginx:1.16
+        ports:
+        - containerPort: 80
+
+
+k apply -f config-file.yaml
+
+
+## 8. Config file syntaxe
+
+### Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 
+  labels:
+spec: #desired state
+ replicas:
+ selector:
+ template:
+
+### Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: 
+spec:
+ selector:
+ ports:
+ 
+## 9. Access Pods Externally
 
 k expose deployment my-nginx-deploy --type=NodePort --port=80
 k get services
