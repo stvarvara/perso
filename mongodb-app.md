@@ -26,7 +26,6 @@ kubectl apply -f mongodb-secret.yaml
 nano mongodb-deploy.yaml
 ```
 
-
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -64,9 +63,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb-service
-  labels:
-    app: mongodb
+  name: mongodb-service 
 spec:
   selector:
     app: mongodb
@@ -81,6 +78,82 @@ spec:
 k apply -f mongodb-deploy.yaml
 ```
 
-## MongoExpress deployement (we need MongoDB url (ConfigMap) and credentials (Secret ) to communicate -> deployement file)
+## ConfigMap + MongoExpress Deployement + External Service
 
-## External Service
+```bash
+nano mongo-configMap.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-configmap
+data:
+    database_url: mongodb-service
+```
+
+```bash
+k apply -f mongo-configMap.yaml
+nano mongo-express-deploy.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+        - name: ME_CONFIG_MONGODB_AUTH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-username
+        - name: ME_CONFIG_MONGODB_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+spec:
+  selector:
+    app: mongo-express
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30000
+```
+
+```bash
+k apply -f mongo-express-deploy.yaml
+minikube service mongo-express-service
+```
