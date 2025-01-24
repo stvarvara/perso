@@ -432,6 +432,10 @@ k apply -f mongodb-deploy.yaml
 ```
 ## Internal Service
 
+```bash
+nano mongo-internal-.yaml
+```
+
 ## MongoExpress deployement (we need MongoDB url (ConfigMap) and credentials (Secret ) to communicate -> deployement file) 
 
 
